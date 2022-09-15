@@ -20,7 +20,7 @@ class RemindersListViewModel(
      * Get all the reminders from the DataSource and add them to the remindersList to be shown on the UI,
      * or show error if any
      */
-    fun loadReminders() {
+    fun loadReminders(onFinish: () -> Unit = {}) {
         showLoading.value = true
         viewModelScope.launch {
             //interacting with the dataSource has to be through a coroutine
@@ -31,14 +31,7 @@ class RemindersListViewModel(
                     val dataList = ArrayList<ReminderDataItem>()
                     dataList.addAll((result.data as List<ReminderDTO>).map { reminder ->
                         //map the reminder data from the DB to the be ready to be displayed on the UI
-                        ReminderDataItem(
-                            reminder.title,
-                            reminder.description,
-                            reminder.location,
-                            reminder.latitude,
-                            reminder.longitude,
-                            reminder.id
-                        )
+                        reminder.toDataItem()
                     })
                     remindersList.value = dataList
                 }
@@ -48,6 +41,7 @@ class RemindersListViewModel(
 
             //check if no data has to be shown
             invalidateShowNoData()
+            onFinish()
         }
     }
 

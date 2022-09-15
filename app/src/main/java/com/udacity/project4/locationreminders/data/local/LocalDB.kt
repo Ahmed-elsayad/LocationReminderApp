@@ -1,6 +1,7 @@
 package com.udacity.project4.locationreminders.data.local
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import androidx.room.Room
 
 
@@ -19,4 +20,11 @@ object LocalDB {
         ).build().reminderDao()
     }
 
+    @VisibleForTesting
+    fun createTestRemindersDao(context: Context): RemindersDao {
+        return Room.inMemoryDatabaseBuilder(
+            context.applicationContext,
+            RemindersDatabase::class.java,
+        ).build().reminderDao()
+    }
 }

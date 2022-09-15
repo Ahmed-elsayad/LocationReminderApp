@@ -3,27 +3,21 @@ package com.udacity.project4.utils
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.content.Context
-import android.net.ConnectivityManager
-import android.util.Log
+import android.content.pm.PackageManager
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.udacity.project4.base.BaseDataClass
 import com.udacity.project4.base.BaseRecyclerViewAdapter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
 
 
 /**
  * Extension function to setup the RecyclerView
  */
-fun <T> RecyclerView.setup(
+fun <T : BaseDataClass> RecyclerView.setup(
     adapter: BaseRecyclerViewAdapter<T>
 ) {
     this.apply {
@@ -65,4 +59,11 @@ fun View.fadeOut() {
             this@fadeOut.visibility = View.GONE
         }
     })
+}
+
+fun Context.isPermissionGranted(permission: String): Boolean {
+    return ContextCompat.checkSelfPermission(
+        this,
+        permission
+    ) == PackageManager.PERMISSION_GRANTED
 }

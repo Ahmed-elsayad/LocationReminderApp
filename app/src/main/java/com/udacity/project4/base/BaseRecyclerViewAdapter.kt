@@ -6,20 +6,19 @@ import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 
-abstract class BaseRecyclerViewAdapter<T>(private val callback: ((item: T) -> Unit)? = null) :
-    RecyclerView.Adapter<DataBindingViewHolder<T>>() {
+abstract class BaseRecyclerViewAdapter<T : BaseDataClass>(
+    private val callback: ((item: T) -> Unit)? = null
+) :
+    ListAdapter<T, DataBindingViewHolder<T>>(DiffUtilCallback()) {
 
-    private var _items: MutableList<T> = mutableListOf()
+    class DiffUtilCallback<T : BaseDataClass> : DiffUtil.ItemCallback<T>() {
+        override fun areItemsTheSame(oldItem: T, newItem: T) = oldItem.id == newItem.id
 
-    /**
-     * Returns the _items data
-     */
-    private val items: List<T>?
-        get() = this._items
-
-    override fun getItemCount() = _items.size
+        override fun areContentsTheSame(oldItem: T, newItem: T) = oldItem == newItem
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBindingViewHolder<T> {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -40,26 +39,6 @@ abstract class BaseRecyclerViewAdapter<T>(private val callback: ((item: T) -> Un
         }
     }
 
-    fun getItem(position: Int) = _items[position]
-
-    /**
-     * Adds data to the actual Dataset
-     *
-     * @param items to be merged
-     */
-    fun addData(items: List<T>) {
-        _items.addAll(items)
-        notifyDataSetChanged()
-    }
-
-    /**
-     * Clears the _items data
-     */
-    fun clear() {
-        _items.clear()
-        notifyDataSetChanged()
-    }
-
     @LayoutRes
     abstract fun getLayoutRes(viewType: Int): Int
 
@@ -67,4 +46,3 @@ abstract class BaseRecyclerViewAdapter<T>(private val callback: ((item: T) -> Un
         return null
     }
 }
-

@@ -22,10 +22,12 @@
             android:background="@color/white">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/reminderssRecyclerView"
+                android:id="@+id/remindersRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:liveData="@{viewModel.remindersList}"
+                items="@{viewModel.remindersList}"
+                tools:listitem="@layout/it_reminder"
+                tools:itemCount="3"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -35,21 +37,21 @@
                 android:id="@+id/noDataTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableTop="@drawable/ic_no_data"
-                android:fadeVisible="@{viewModel.showNoData.booleanValue()}"
+                android:fadeVisible="@{viewModel.showNoData}"
                 android:gravity="center"
                 android:text="@string/no_data"
                 android:textSize="@dimen/text_size_large"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:drawableTopCompat="@drawable/ic_no_data" />
 
             <ProgressBar
                 android:id="@+id/progressBar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fadeVisible="@{viewModel.showLoading.booleanValue()}"
+                android:fadeVisible="@{viewModel.showLoading}"
                 android:gravity="center"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -63,10 +65,11 @@
                 android:layout_margin="@dimen/margin_normal"
                 android:src="@drawable/ic_add"
                 app:fabSize="normal"
-                app:layout_anchor="@id/reminderssRecyclerView"
+                app:layout_anchor="@id/remindersRecyclerView"
                 app:layout_anchorGravity="bottom|right|end"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                android:contentDescription="Add Reminder" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </layout>
