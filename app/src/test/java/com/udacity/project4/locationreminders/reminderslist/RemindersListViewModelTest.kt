@@ -20,11 +20,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
-
+//testing SaveReminderViewModel with fakeDataSource
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
 class RemindersListViewModelTest {
 
+    // Set the main coroutines dispatcher for unit testing.
 
 /*
 * Rules defined by fields will always be applied after
@@ -34,10 +35,13 @@ class RemindersListViewModelTest {
     @get:Rule
     var instantExecuteRule = InstantTaskExecutorRule()
 
+    // Set the main coroutines dispatcher for unit testing.
     @get:Rule
     var mainCoroutineRule = MainCoroutineRule()
-
+// the class under test
     private lateinit var remindersListViewModel: RemindersListViewModel
+
+    // Use a fake data source to be injected into the viewModel
     private lateinit var dataSource: FakeDataSource
 
     @Before
@@ -51,16 +55,20 @@ class RemindersListViewModelTest {
             dataSource
         )
     }
-
+   //  test deleting all reminders and then we try to load the reminders from our View Model
+   //      We  testing remindersList
     @Test
     fun loadReminders_Empty() = runTest {
-        dataSource.deleteAllReminders()
+       //GIVEN - Empty DB
+       dataSource.deleteAllReminders()
+       //then - Try to load Reminders
         remindersListViewModel.loadReminders()
 
+       //THEN - We expect that our reminder list is empty
         assertThat(remindersListViewModel.remindersList.value, equalTo(null))
     }
 
-
+// testing that we can insert into database and the retreieve from data base and reminderList not equal to null
     @Test
     fun loadReminders_NotNull( ) = runTest {
         dataSource.saveReminder(ReminderDTO("Title", "Desc", "loc", null, null))
@@ -71,38 +79,47 @@ class RemindersListViewModelTest {
 
         assertThat(remindersListViewModel.remindersList.getOrAwaitValue(), not(equalTo(null)))
     }
-
+   //Here in this test we testing showing an Error
     @Test
     fun shouldReturnError() = runTest {
+        //GIVEN - Set should return error to "true"
         dataSource.makeErrorWhileGetReminders = true
-
+      //WHEN - We load Reminders
         remindersListViewModel.loadReminders()
 
         // run all pending coroutines
         runCurrent()
-
+       //THEN - We get showSnackBar in the view model giving us "test exception"
         assertThat(remindersListViewModel.showSnackBar.getOrAwaitValue(), equalTo("Test exception"))
     }
 
+    //Here in this test we testing showing reminders not found
     @Test
     fun dataNotFound() = runTest {
+        //when reminders are null
         dataSource.makeRemindersNull()
+        //loading  reminders
         remindersListViewModel.loadReminders()
         // run all pending coroutines
         runCurrent()
-
+        //THEN - We get showSnackBar in the view model giving us "Reminders not found"
         assertThat(remindersListViewModel.showSnackBar.getOrAwaitValue(), equalTo("Reminders not found"))
     }
 
+    // this function we test check Loading
     @Test
     fun checkLoading() = runTest {
+//        Moves the virtual clock of this dispatcher forward by the specified amount,
+//        running the scheduled tasks in the meantime.
         advanceTimeBy(0)
+        // when loading
         remindersListViewModel.loadReminders()
-        assertThat(remindersListViewModel.showLoading.getOrAwaitValue(), equalTo(true))
 
+        // THEN -  loading indicator is shown
+        assertThat(remindersListViewModel.showLoading.getOrAwaitValue(), equalTo(true))
+        //Run any tasks that are pending
         runCurrent()
         // Then viewModel's livedata is back to false
-
         assertThat(remindersListViewModel.showLoading.getOrAwaitValue(), equalTo(false))
     }
 }

@@ -44,6 +44,7 @@ import org.mockito.Mockito.verify
 @ExperimentalCoroutinesApi
 //UI Testing
 @MediumTest
+// testing ReminderListFragment by the help of Koin as service locator
 class ReminderListFragmentTest : AutoCloseKoinTest() {
 
     private lateinit var repository: ReminderDataSource
@@ -57,6 +58,7 @@ class ReminderListFragmentTest : AutoCloseKoinTest() {
     fun setUp() {
         stopKoin()//stop the original app koin
         appContext = getApplicationContext()
+        // use Koin Library as a service locator
         val myModule = module {
             viewModel {
                 RemindersListViewModel(
@@ -106,7 +108,7 @@ class ReminderListFragmentTest : AutoCloseKoinTest() {
             unregister(EspressoIdlingResource.countingIdlingResource)
         }
     }
-
+    //testing the ReminderList to check if it shows the reminders correctly
     @Test
     fun reminderList_DisplayedInUI() = runTest {
         val reminderDTO = ReminderDTO("T", "D", "L", 0.0, 0.0)
@@ -128,6 +130,7 @@ class ReminderListFragmentTest : AutoCloseKoinTest() {
         fragmentScenario.close()
     }
 
+  //testing the clickFab and we expect to navigate to the Reminder Fragment
     @Test
     fun onFabClick_navigate() {
         val fragmentScenario = FragmentScenario.launchInContainer(
@@ -141,9 +144,10 @@ class ReminderListFragmentTest : AutoCloseKoinTest() {
         fragmentScenario.onFragment {
             Navigation.setViewNavController(it.requireView(), navController)
         }
-
+         // WHEN - Click on the "+" button
         onView(withId(R.id.addReminderFAB)).perform(click())
 
+      // THEN - Verify that we navigate to the save reminder fragment
         verify(navController).navigate(
             ReminderListFragmentDirections.toSaveReminder()
         )
