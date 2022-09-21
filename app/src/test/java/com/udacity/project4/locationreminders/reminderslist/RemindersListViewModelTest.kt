@@ -4,10 +4,10 @@ import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.udacity.project4.locationreminders.MainCoroutineRule
+import com.udacity.project4.MainCoroutineRule
+import com.udacity.project4.getOrAwaitValue
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
-import com.udacity.project4.locationreminders.getOrAwaitValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -25,6 +25,12 @@ import org.koin.core.context.stopKoin
 @ExperimentalCoroutinesApi
 class RemindersListViewModelTest {
 
+
+/*
+* Rules defined by fields will always be applied after
+* Rules defined by methods, i.e. the Statements returned by
+* the former will be executed around those returned by the latter.
+* */
     @get:Rule
     var instantExecuteRule = InstantTaskExecutorRule()
 
@@ -95,6 +101,7 @@ class RemindersListViewModelTest {
         assertThat(remindersListViewModel.showLoading.getOrAwaitValue(), equalTo(true))
 
         runCurrent()
+        // Then viewModel's livedata is back to false
 
         assertThat(remindersListViewModel.showLoading.getOrAwaitValue(), equalTo(false))
     }

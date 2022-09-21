@@ -4,15 +4,15 @@ import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.udacity.project4.MainCoroutineRule
 import com.udacity.project4.R
 import com.udacity.project4.base.NavigationCommand
-import com.udacity.project4.locationreminders.MainCoroutineRule
-
+import com.udacity.project4.getOrAwaitValue
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.Result
-import com.udacity.project4.locationreminders.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
@@ -26,6 +26,13 @@ import org.koin.core.context.stopKoin
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 class SaveReminderViewModelTest {
+
+
+/*
+* Rules defined by fields will always be applied after
+* Rules defined by methods, i.e. the Statements returned by
+* the former will be executed around those returned by the latter.
+* */
 
     @get:Rule
     var instantExecuteRule = InstantTaskExecutorRule()
@@ -113,7 +120,6 @@ class SaveReminderViewModelTest {
             it.location = "location"
             it.title = "title"
         }
-
         assertThat(saveReminderViewModel.showLoading.getOrAwaitValue(), equalTo(true))
 
         this.runCurrent()

@@ -11,6 +11,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.udacity.project4.Constants
 import com.udacity.project4.R
 import com.udacity.project4.databinding.ActivityReminderDescriptionBinding
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
@@ -62,7 +63,7 @@ class ReminderDescriptionActivity : AppCompatActivity() {
                         map.addCircle(
                             CircleOptions()
                                 .center(position)
-                                .radius(100f.toDouble())
+                                .radius(Constants.REMINDER_LOCATION_CIRCLE_RADIUS.toDouble())
                         )
                     }
                 }
