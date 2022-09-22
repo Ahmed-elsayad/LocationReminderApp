@@ -25,8 +25,6 @@ import com.udacity.project4.locationreminders.geofence.GeofenceTransitionsServic
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.LocationSettingsState
 import com.udacity.project4.utils.locationStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.sharedStateViewModel

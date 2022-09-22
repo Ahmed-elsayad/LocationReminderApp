@@ -21,7 +21,6 @@ class FakeDataSource : ReminderDataSource {
   // retrieve  all fake reminders inserted to our fake db
     //
     override suspend fun getReminders(): Result<List<ReminderDTO>> {
-      // for making error and makeErrorWhileGetReminders = true
         if (makeErrorWhileGetReminders) {
             return Result.Error("Test exception")
         }
@@ -36,8 +35,7 @@ class FakeDataSource : ReminderDataSource {
     }
 // getting fake reminder its id from the fake db
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
-    // return error when exception happened
-    //when makeErrorWhileGetReminders = true
+
         if (makeErrorWhileGetReminders) {
             return Result.Error("Test exception")
         } else {
