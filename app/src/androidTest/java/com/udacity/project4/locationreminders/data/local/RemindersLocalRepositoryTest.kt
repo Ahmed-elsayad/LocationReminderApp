@@ -89,9 +89,9 @@ class RemindersLocalRepositoryTest {
     fun getReminder_NotFound() = scope.runTest {
         val result = remindersLocalRepository.getReminder("")
        // assert that the result matches the examined object error
-        assertThat(result, `is`(instanceOf(Result.Empty::class.java)))
+        assertThat(result, `is`(instanceOf(Result.Error::class.java)))
 
-        val message = (result as Result.Empty).message
+        val message = (result as Result.Error).message
 // the error messege must equal to (reminder not found)
         assertThat(message, equalTo("Reminder not found!"))
     }

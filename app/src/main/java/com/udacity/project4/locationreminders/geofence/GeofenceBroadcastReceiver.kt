@@ -50,7 +50,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                 geofencingEvent.triggeringGeofences?.forEach {
                     scope.launch {
                         when (val reminderDTO = dataSource.getReminder(it.requestId)) {
-                            is Result.Empty -> Log.e(TAG, reminderDTO.message ?: "No Message")
+                            is Result.Error -> Log.e(TAG, reminderDTO.message ?: "No Message")
                             is Result.Success -> sendNotification(
                                 context,
                                 reminderDTO.data.toDataItem()

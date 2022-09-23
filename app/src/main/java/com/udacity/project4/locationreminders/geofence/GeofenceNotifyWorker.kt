@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.udacity.project4.locationreminders.data.ReminderDataSource
-import com.udacity.project4.locationreminders.data.dto.Result.Empty
+import com.udacity.project4.locationreminders.data.dto.Result.Error
 import com.udacity.project4.locationreminders.data.dto.Result.Success
 import com.udacity.project4.utils.sendNotification
 import org.koin.core.component.KoinComponent
@@ -28,7 +28,7 @@ class GeofenceNotifyWorker(
 
         requestIdList?.forEach { requestId ->
             when (val reminderDTO = dataSource.getReminder(requestId)) {
-                is Empty ->  {
+                is Error ->  {
                     Log.e(
                         TAG, reminderDTO.message ?: "No Message"
                     )

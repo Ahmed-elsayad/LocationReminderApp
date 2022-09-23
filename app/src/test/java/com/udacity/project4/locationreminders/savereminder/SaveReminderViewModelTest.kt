@@ -1,13 +1,14 @@
 package com.udacity.project4.locationreminders.savereminder
 
+
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.udacity.project4.MainCoroutineRule
 import com.udacity.project4.R
 import com.udacity.project4.base.NavigationCommand
-import com.udacity.project4.getOrAwaitValue
+import com.udacity.project4.locationreminder.MainCoroutineRule
+import com.udacity.project4.locationreminder.getOrAwaitValue
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.Result
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,7 +59,7 @@ class SaveReminderViewModelTest {
     }
 
     private fun makeReminderValid() = saveReminderViewModel.run {
-      reminderTitle.value = "Title"
+        reminderTitle.value = "Title"
         reminderDescription.value = "Desc"
         reminderSelectedLocationStr.value = "Loc"
         latitude.value = 0.0
@@ -92,7 +93,7 @@ class SaveReminderViewModelTest {
             assertThat(longitude.getOrAwaitValue(), equalTo(null))
         }
     }
-// testing add Reminder to Data Source via our ViewModel.saveReminder function
+    // testing add Reminder to Data Source via our ViewModel.saveReminder function
     @Test
     fun saveReminder_Valid() = runTest {
         makeReminderValid()
@@ -109,7 +110,7 @@ class SaveReminderViewModelTest {
         runCurrent()
 
         assertThat(dataSource.getReminder(validReminder.id), `is`(instanceOf(Result.Success::class.java)))
-       // assert that navigates back to the previous fragment
+        // assert that navigates back to the previous fragment
         assertThat(saveReminderViewModel.navigationCommand.getOrAwaitValue(), equalTo(NavigationCommand.Back))
     }
 
@@ -123,31 +124,4 @@ class SaveReminderViewModelTest {
         assertThat(saveReminderViewModel.showSnackBarInt.getOrAwaitValue(), equalTo(R.string.err_enter_title))
     }
 
-    @Test
-    fun checkLoading() = runTest {
-     //   Moves the virtual clock of this dispatcher forward by the specified amount, running the scheduled tasks in the meantime.
-        //   Moves the virtual clock of this dispatcher forward by the specified amount, running the scheduled tasks in the meantime.
-        this.advanceTimeBy(0)
-
-
-        //GIVEN - reminder to be saved
-
-        saveReminderViewModel.saveReminder{
-            it.description = "description"
-            it.latitude = 1.0
-            it.longitude= 1.0
-            it.location = "location"
-            it.title = "title"
-        }
-
-        // THEN -  loading indicator is shown
-
-        assertThat(saveReminderViewModel.showLoading.getOrAwaitValue(), equalTo(true))
-   // running the scheduled tasks in the meantime.
-        this.runCurrent()
-    // THEN -  loading indicator is hidden
-        assertThat(saveReminderViewModel.showLoading.getOrAwaitValue(), equalTo(false))
-
-        // after loading the reminders the loading indicator should be false
-    }
 }
