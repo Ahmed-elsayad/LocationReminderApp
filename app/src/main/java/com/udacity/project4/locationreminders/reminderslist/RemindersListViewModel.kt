@@ -35,7 +35,7 @@ class RemindersListViewModel(
                     })
                     remindersList.value = dataList
                 }
-                is Result.Error ->
+                is Result.Empty ->
                     showSnackBar.value = result.message
             }
 

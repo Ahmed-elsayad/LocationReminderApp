@@ -21,13 +21,14 @@ class FakeDataSource : ReminderDataSource {
   // retrieve  all fake reminders inserted to our fake db
     //
     override suspend fun getReminders(): Result<List<ReminderDTO>> {
+
         if (makeErrorWhileGetReminders) {
-            return Result.Error("Test exception")
+            return Result.Empty("Test exception")
         }
       //when retrieve reminder from db by its id
         reminders?.let { return Result.Success(ArrayList(it)) }
       // when trying  get data from empty db
-        return Result.Error("Reminders not found")
+        return Result.Empty("Reminders not found")
     }
 // insert fake reminder to database
     override suspend fun saveReminder(reminder: ReminderDTO) {
@@ -37,12 +38,12 @@ class FakeDataSource : ReminderDataSource {
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
 
         if (makeErrorWhileGetReminders) {
-            return Result.Error("Test exception")
+            return Result.Empty("Test exception")
         } else {
             reminders?.firstOrNull { it.id == id }.also {
                 return when(it) {
                     //return null
-                    null -> Result.Error("Not Found")
+                    null -> Result.Empty("Not Found")
                     // when the inserted id equal the the item returned
                     else -> Result.Success(it)
                 }
