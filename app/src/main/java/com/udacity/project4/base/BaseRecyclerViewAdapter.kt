@@ -6,19 +6,20 @@ import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 
-abstract class BaseRecyclerViewAdapter<T : BaseDataClass>(
-    private val callback: ((item: T) -> Unit)? = null
-) :
-    ListAdapter<T, DataBindingViewHolder<T>>(DiffUtilCallback()) {
+abstract class BaseRecyclerViewAdapter<T>(private val clickCallback: ((item: T) -> Unit)? = null,private val deleteCallback: ((item: T) -> Unit)? = null) :
+    RecyclerView.Adapter<DataBindingViewHolder<T>>() {
 
-    class DiffUtilCallback<T : BaseDataClass> : DiffUtil.ItemCallback<T>() {
-        override fun areItemsTheSame(oldItem: T, newItem: T) = oldItem.id == newItem.id
+    private var _items: MutableList<T> = mutableListOf()
 
-        override fun areContentsTheSame(oldItem: T, newItem: T) = oldItem == newItem
-    }
+    /**
+     * Returns the _items data
+     */
+    private val items: List<T>?
+        get() = this._items
+
+    override fun getItemCount() = _items.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBindingViewHolder<T> {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -27,7 +28,6 @@ abstract class BaseRecyclerViewAdapter<T : BaseDataClass>(
             .inflate<ViewDataBinding>(layoutInflater, getLayoutRes(viewType), parent, false)
 
         binding.lifecycleOwner = getLifecycleOwner()
-
         return DataBindingViewHolder(binding)
     }
 
@@ -35,8 +35,33 @@ abstract class BaseRecyclerViewAdapter<T : BaseDataClass>(
         val item = getItem(position)
         holder.bind(item)
         holder.itemView.setOnClickListener {
-            callback?.invoke(item)
+            clickCallback?.invoke(item)
         }
+        holder.itemView.setOnLongClickListener {
+            deleteCallback?.invoke(item)
+            return@setOnLongClickListener true
+        }
+
+    }
+
+    fun getItem(position: Int) = _items[position]
+
+    /**
+     * Adds data to the actual Dataset
+     *
+     * @param items to be merged
+     */
+    fun addData(items: List<T>) {
+        _items.addAll(items)
+        notifyDataSetChanged()
+    }
+
+    /**
+     * Clears the _items data
+     */
+    fun clear() {
+        _items.clear()
+        notifyDataSetChanged()
     }
 
     @LayoutRes
@@ -45,4 +70,13 @@ abstract class BaseRecyclerViewAdapter<T : BaseDataClass>(
     open fun getLifecycleOwner(): LifecycleOwner? {
         return null
     }
+
+    fun removeAt(position: Int) {
+        _items.removeAt(position)
+        notifyItemRemoved(position)
+        notifyItemRangeChanged(position,1)
+        notifyDataSetChanged()
+
+    }
 }
+

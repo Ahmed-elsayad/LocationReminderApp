@@ -2,7 +2,7 @@ package com.udacity.project4.base
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.MediatorLiveData
 import com.udacity.project4.utils.SingleLiveEvent
 
 /**
@@ -16,6 +16,6 @@ abstract class BaseViewModel(app: Application) : AndroidViewModel(app) {
     val showSnackBarInt: SingleLiveEvent<Int> = SingleLiveEvent()
     val showToast: SingleLiveEvent<String> = SingleLiveEvent()
     val showLoading: SingleLiveEvent<Boolean> = SingleLiveEvent()
-    val showNoData: MutableLiveData<Boolean> = MutableLiveData()
+    open val showNoData: MediatorLiveData<Boolean> = MediatorLiveData()
 
 }

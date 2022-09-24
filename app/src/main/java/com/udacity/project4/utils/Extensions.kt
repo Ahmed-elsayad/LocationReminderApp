@@ -2,28 +2,26 @@ package com.udacity.project4.utils
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.content.Context
-import android.content.pm.PackageManager
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.udacity.project4.base.BaseDataClass
 import com.udacity.project4.base.BaseRecyclerViewAdapter
 
 
 /**
  * Extension function to setup the RecyclerView
  */
-fun <T : BaseDataClass> RecyclerView.setup(
+fun <T> RecyclerView.setup(
     adapter: BaseRecyclerViewAdapter<T>
 ) {
     this.apply {
         layoutManager = LinearLayoutManager(this.context)
         this.adapter = adapter
+
     }
+
 }
 
 fun Fragment.setTitle(title: String) {
@@ -59,11 +57,4 @@ fun View.fadeOut() {
             this@fadeOut.visibility = View.GONE
         }
     })
-}
-
-fun Context.isPermissionGranted(permission: String): Boolean {
-    return ContextCompat.checkSelfPermission(
-        this,
-        permission
-    ) == PackageManager.PERMISSION_GRANTED
 }

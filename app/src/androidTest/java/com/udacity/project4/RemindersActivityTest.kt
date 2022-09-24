@@ -1,10 +1,11 @@
 package com.udacity.project4
 
+import android.Manifest
 import android.app.Activity
 import android.app.Application
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
-import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.*
@@ -13,12 +14,11 @@ import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import com.udacity.project4.locationreminders.RemindersActivity
+import androidx.test.rule.GrantPermissionRule
+import androidx.test.runner.permission.PermissionRequester
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
-import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
-import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.util.DataBindingIdlingResource
 import com.udacity.project4.util.monitorActivity
 import com.udacity.project4.utils.EspressoIdlingResource
@@ -27,6 +27,7 @@ import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.not
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -44,6 +45,16 @@ class RemindersActivityTest :
     private lateinit var appContext: Application
 
     private val dataBindingIdlingResource = DataBindingIdlingResource()
+
+    @get:Rule
+    var mRuntimePermissionRule = GrantPermissionRule.grant(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+
+    @get:Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
+
 
     @Before
     fun init() {
@@ -73,7 +84,15 @@ class RemindersActivityTest :
         runBlocking {
             repository.deleteAllReminders()
         }
+
+
+        PermissionRequester().apply { addPermissions(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) }
     }
+
 
     @Before
     fun registerIdlingResource() {

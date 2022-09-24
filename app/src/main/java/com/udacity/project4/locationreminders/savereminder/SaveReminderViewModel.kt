@@ -1,40 +1,29 @@
 package com.udacity.project4.locationreminders.savereminder
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.PointOfInterest
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseViewModel
-import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
+import com.udacity.project4.utils.EspressoIdlingResource
 import kotlinx.coroutines.launch
 
-class SaveReminderViewModel(val app: Application, private val dataSource: ReminderDataSource) :
+class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSource) :
     BaseViewModel(app) {
-
-    // below values are set from user input
     val reminderTitle = MutableLiveData<String?>()
     val reminderDescription = MutableLiveData<String?>()
-
-    // below values are set from location choose
     val reminderSelectedLocationStr = MutableLiveData<String?>()
+    val selectedPOI = MutableLiveData<PointOfInterest?>()
     val latitude = MutableLiveData<Double?>()
     val longitude = MutableLiveData<Double?>()
-
-    val reminderDataItem
-        get() = run {
-            val title = reminderTitle.value
-            val description = reminderDescription.value
-            val location = reminderSelectedLocationStr.value
-            val latitude = latitude.value
-            val longitude = longitude.value
-
-            ReminderDataItem(title, description, location, latitude, longitude)
-        }
-
+    var saveClicked = MutableLiveData<Boolean>().apply { postValue(false) }
+    var permissionDenied =  MutableLiveData<Boolean>().apply { postValue(false) }
+    var initialLoad = false
+    var requestingLocationUpdates = false
     /**
      * Clear the live data objects to start fresh next time the view model gets called
      */
@@ -42,16 +31,33 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
         reminderTitle.value = null
         reminderDescription.value = null
         reminderSelectedLocationStr.value = null
+        selectedPOI.value = null
         latitude.value = null
         longitude.value = null
     }
 
     /**
+     * Validate the entered data then saves the reminder data to the DataSource
+     */
+    fun validateAndSaveReminder(reminderData: ReminderDataItem) : Boolean {
+        if (validateEnteredData(reminderData)) {
+            saveReminder(reminderData)
+            return true
+        }
+        return false
+    }
+
+    /**
      * Save the reminder to the data source
      */
-    fun saveReminder(onSaveComplete: (ReminderDataItem)->Unit): ReminderDataItem {
-        showLoading.value = true
-        val reminderData = reminderDataItem
+    fun saveReminder(reminderData: ReminderDataItem) {
+        showLoading.postValue(true)
+        reminderTitle.postValue(reminderData.title)
+        reminderDescription.postValue(reminderData.description)
+        reminderSelectedLocationStr.postValue(reminderData.location)
+        latitude.postValue(reminderData.latitude)
+        longitude.postValue(reminderData.longitude)
+        EspressoIdlingResource.increment()
         viewModelScope.launch {
             dataSource.saveReminder(
                 ReminderDTO(
@@ -61,32 +67,35 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
                     reminderData.latitude,
                     reminderData.longitude,
                     reminderData.id
-                ).also { Log.d("ReminderID", "the id = ${it.id}") }
+                )
             )
-            showLoading.value = false
+            EspressoIdlingResource.decrement()
+            showLoading.postValue( false)
             showToast.value = app.getString(R.string.reminder_saved)
-            navigationCommand.value = NavigationCommand.Back
-            onSaveComplete(reminderData)
         }
-
-        return reminderData
     }
 
     /**
      * Validate the entered data and show error to the user if there's any invalid data
      */
-    fun validateEnteredData(): Boolean {
-        val reminderData = reminderDataItem
-
-        if (reminderData.title.isNullOrBlank()) {
-            showSnackBarInt.value = R.string.err_enter_title
+     fun validateEnteredData(reminderData: ReminderDataItem): Boolean {
+        if (reminderData.title.isNullOrEmpty()) {
+            showSnackBarInt.postValue(R.string.err_enter_title)
             return false
         }
 
-        if (reminderData.location.isNullOrBlank()) {
-            showSnackBarInt.value = R.string.err_select_location
+        if (reminderData.description.isNullOrEmpty()) {
+            showSnackBarInt.postValue(R.string.err_enter_description)
+            return false
+        }
+
+        if (reminderData.location.isNullOrEmpty()) {
+
+            showSnackBarInt.postValue(R.string.err_select_location)
             return false
         }
         return true
     }
+
+
 }

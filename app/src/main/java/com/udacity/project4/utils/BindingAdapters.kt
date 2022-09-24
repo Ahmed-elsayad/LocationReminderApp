@@ -2,10 +2,10 @@ package com.udacity.project4.utils
 
 import android.view.View
 import androidx.databinding.BindingAdapter
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
-import com.udacity.project4.base.BaseDataClass
 import com.udacity.project4.base.BaseRecyclerViewAdapter
-
+import com.udacity.project4.locationreminders.data.dto.Result
 
 object BindingAdapters {
 
@@ -13,12 +13,20 @@ object BindingAdapters {
      * Use binding adapter to set the recycler view data using livedata object
      */
     @Suppress("UNCHECKED_CAST")
-    @BindingAdapter("items")
+    @BindingAdapter("android:liveData")
     @JvmStatic
-    fun <T : BaseDataClass> RecyclerView.setRecyclerViewData(items: List<T>?) {
-        (adapter as? BaseRecyclerViewAdapter<T>)?.run {
-            submitList(items)
+    fun <T> setRecyclerViewData(recyclerView: RecyclerView, items: MutableLiveData<Result<List<T>>>?) {
+        items?.value?.let {
+            if (it !is Error) {
+                (it as Result.Success<List<T>>).data.let { itemList ->
+                    (recyclerView.adapter as? BaseRecyclerViewAdapter<T>)?.apply {
+                        clear()
+                        addData(itemList)
+                    }
+                }
+            }
         }
+
     }
 
     /**

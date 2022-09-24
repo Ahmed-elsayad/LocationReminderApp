@@ -24,7 +24,7 @@
             android:id="@+id/action_saveReminderFragment_to_reminderListFragment"
             app:destination="@id/reminderListFragment" />
         <action
-            android:id="@+id/to_set_location"
+            android:id="@+id/action_saveReminderFragment_to_selectLocationFragment"
             app:destination="@id/selectLocationFragment" />
     </fragment>
     <fragment

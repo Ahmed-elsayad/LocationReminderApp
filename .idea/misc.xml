@@ -3,6 +3,15 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/github/OriginalApp/app/src/main/res/drawable/ic_add.xml" value="0.1" />
+        <entry key="..\:/github/OriginalApp/app/src/main/res/layout/activity_authentication.xml" value="0.27291666666666664" />
+        <entry key="..\:/github/OriginalApp/app/src/main/res/layout/activity_reminder_description.xml" value="0.22592592592592592" />
+        <entry key="..\:/github/OriginalApp/app/src/main/res/layout/activity_reminders.xml" value="0.1" />
+        <entry key="..\:/github/OriginalApp/app/src/main/res/layout/fragment_reminders.xml" value="0.22592592592592592" />
+        <entry key="..\:/github/OriginalApp/app/src/main/res/layout/fragment_save_reminder.xml" value="0.22592592592592592" />
+        <entry key="..\:/github/OriginalApp/app/src/main/res/layout/fragment_select_location.xml" value="0.22592592592592592" />
+        <entry key="..\:/github/OriginalApp/app/src/main/res/layout/it_reminder.xml" value="0.22592592592592592" />
+        <entry key="..\:/github/OriginalApp/app/src/main/res/menu/main_menu.xml" value="0.27291666666666664" />
         <entry key="..\:/github/nd940-android-kotlin-c4-starter/starter/app/src/main/res/drawable-v24/ic_add.xml" value="0.1" />
         <entry key="..\:/github/nd940-android-kotlin-c4-starter/starter/app/src/main/res/drawable-v24/ic_baseline_where_to_vote_24.xml" value="0.1" />
         <entry key="..\:/github/nd940-android-kotlin-c4-starter/starter/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1" />
