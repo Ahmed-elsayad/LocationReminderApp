@@ -1,124 +1,167 @@
 package com.udacity.project4.locationreminders.savereminder
 
-
-import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.PointOfInterest
 import com.udacity.project4.R
 import com.udacity.project4.locationreminder.MainCoroutineRule
-import com.udacity.project4.locationreminder.getOrAwaitValue
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.Result
+import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.pauseDispatcher
+import kotlinx.coroutines.test.resumeDispatcher
+import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
 
-//testing SaveReminderViewModel with fakeDataSource
-
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 class SaveReminderViewModelTest {
 
-
-/*
-* Rules defined by fields will always be applied after
-* Rules defined by methods, i.e. the Statements returned by
-* the former will be executed around those returned by the latter.
-* */
-
-    // Executes each task synchronously using Architecture Components.
+    //COMPLETED: provide testing to the SaveReminderView and its live data objects
+    private lateinit var  saveReminderViewModel: SaveReminderViewModel
+    private lateinit var fakeDataSource: FakeDataSource
+    private lateinit var testReminder : ReminderDataItem
 
     @get:Rule
-    var instantExecuteRule = InstantTaskExecutorRule()
+    var mainCoroutineRule = MainCoroutineRule()
 
-    // Set the main coroutines dispatcher for unit testing.
+    //Executes each task synchronously using Architecture components
     @get:Rule
-    var mainCommand = MainCoroutineRule()
-
-    private lateinit var saveReminderViewModel: SaveReminderViewModel
-    // Use a fake data source to be injected into the SaveReminderViewModel
-    private lateinit var dataSource: FakeDataSource
-
-    private fun makeReminderInvalid() = saveReminderViewModel.run {
-        reminderTitle.value = ""
-        reminderDescription.value = "Desc"
-        reminderSelectedLocationStr.value = null
-        latitude.value = 0.0
-        longitude.value = 0.0
-    }
-
-    private fun makeReminderValid() = saveReminderViewModel.run {
-        reminderTitle.value = "Title"
-        reminderDescription.value = "Desc"
-        reminderSelectedLocationStr.value = "Loc"
-        latitude.value = 0.0
-        longitude.value = 0.0
-    }
+    var instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @Before
-    fun setUp() {
+    fun setupSaveReminderViewModel(){
         stopKoin()
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        dataSource = FakeDataSource()
-
-        saveReminderViewModel = SaveReminderViewModel(
-            context,
-            dataSource
-        )
+        fakeDataSource = FakeDataSource()
+        saveReminderViewModel = SaveReminderViewModel(ApplicationProvider.getApplicationContext(),fakeDataSource)
+        testReminder = ReminderDataItem("test title","test description","test location",11.1,22.2)
     }
 
-    //In this function we clear all reminders Live Data and test if they all null
     @Test
-    fun onClear() {
-        //WHEN - call on clear
+    fun testGetReminderTitle() = runBlocking {
+        fakeDataSource.deleteAllReminders()
+        saveReminderViewModel.saveReminder(testReminder)
+        assertThat(saveReminderViewModel.reminderTitle.value, `is`(testReminder.title))
+    }
 
+    @Test
+    fun testGetReminderDescription() = runBlocking {
+        fakeDataSource.deleteAllReminders()
+        saveReminderViewModel.saveReminder(testReminder)
+        assertThat(saveReminderViewModel.reminderDescription.value, `is`(testReminder.description))
+    }
+
+    @Test
+    fun testGetReminderSelectedLocationStr() = runBlocking {
+        fakeDataSource.deleteAllReminders()
+        saveReminderViewModel.saveReminder(testReminder)
+        assertThat(saveReminderViewModel.reminderSelectedLocationStr.value, `is`(testReminder.location))
+    }
+
+    @Test
+    fun testGetSelectedPOI(): Unit = runBlocking {
+        fakeDataSource.deleteAllReminders()
+        saveReminderViewModel.saveReminder(testReminder)
+        val poi = PointOfInterest(LatLng(1.1,2.2) ,"1", "Test pin")
+
+        saveReminderViewModel.selectedPOI.postValue(poi)
+        assertThat(saveReminderViewModel.selectedPOI.value, `is`(notNullValue()))
+        saveReminderViewModel.selectedPOI.value?.let {
+            assertThat(it.latLng, `is`(poi.latLng))
+            assertThat(it.placeId, `is`(poi.placeId))
+            assertThat(it.name, `is`(poi.name))
+        }
+    }
+
+    @Test
+    fun testGetLatitude() = runBlocking {
+        fakeDataSource.deleteAllReminders()
+        saveReminderViewModel.saveReminder(testReminder)
+        assertThat(saveReminderViewModel.latitude.value, `is`(testReminder.latitude))
+    }
+
+    @Test
+    fun testGetLongitude() = runBlocking {
+        fakeDataSource.deleteAllReminders()
+        saveReminderViewModel.saveReminder(testReminder)
+        assertThat(saveReminderViewModel.longitude.value, `is`(testReminder.longitude))
+
+    }
+
+    @Test
+    fun testOnClear() = runBlocking {
+        saveReminderViewModel.saveReminder(testReminder)
         saveReminderViewModel.onClear()
-        //THEN - expect that all values egualTo null
-        with(saveReminderViewModel) {
-            assertThat(reminderTitle.getOrAwaitValue(), equalTo(null))
-            assertThat(reminderDescription.getOrAwaitValue(), equalTo(null))
-            assertThat(reminderSelectedLocationStr.getOrAwaitValue(), equalTo(null))
-            assertThat(latitude.getOrAwaitValue(), equalTo(null))
-            assertThat(longitude.getOrAwaitValue(), equalTo(null))
-        }
+        assertThat(saveReminderViewModel.reminderTitle.value, `is`(nullValue()))
+        assertThat(saveReminderViewModel.reminderDescription.value, `is`(nullValue()))
+        assertThat(saveReminderViewModel.reminderSelectedLocationStr.value, `is`(nullValue()))
+        assertThat(saveReminderViewModel.selectedPOI.value, `is`(nullValue()))
+        assertThat(saveReminderViewModel.latitude.value, `is`(nullValue()))
+        assertThat(saveReminderViewModel.longitude.value, `is`(nullValue()))
     }
-    // testing add Reminder to Data Source via our ViewModel.saveReminder function
+
+    fun testValidateAndSaveReminder() = runBlocking {
+        val emptyTitleReminder = ReminderDataItem("","test description","test location",11.1,22.2)
+        fakeDataSource.deleteAllReminders()
+        saveReminderViewModel.validateAndSaveReminder(emptyTitleReminder)
+        var result = fakeDataSource.getReminders()
+        assertThat(result, `is`(Result.Error( InstrumentationRegistry.getInstrumentation().context.getString(
+            R.string.no_reminders))))
+
+        val emptyDescriptionReminder = ReminderDataItem("test title","","test location",11.1,22.2)
+        fakeDataSource.deleteAllReminders()
+        saveReminderViewModel.validateAndSaveReminder(emptyDescriptionReminder)
+        result = fakeDataSource.getReminders()
+        assertThat(result, `is`(Result.Error( InstrumentationRegistry.getInstrumentation().context.getString(
+            R.string.no_reminders))))
+    }
+
+    fun testSaveReminder() = runBlocking {
+        fakeDataSource.deleteAllReminders()
+        saveReminderViewModel.saveReminder(testReminder)
+        val reminder = fakeDataSource.getFirstReminder()
+        assertThat(reminder.title, `is`(testReminder.title))
+        assertThat(reminder.description,`is`(testReminder.description))
+        assertThat(reminder.location,`is`(testReminder.location))
+        assertThat(reminder.latitude,`is`(testReminder.latitude))
+        assertThat(reminder.location,`is`(testReminder.location))
+    }
+
+    fun testValidateEnteredData() = runBlocking{
+        val reminder = ReminderDataItem("","test description","test location",11.1,22.2)
+        assertThat(saveReminderViewModel.validateEnteredData(reminder),`is`(false))     // title is empty
+
+        reminder.title = "test title"
+        reminder.description = ""
+        assertThat(saveReminderViewModel.validateEnteredData(reminder),`is`(false))     // description is empty
+
+        reminder.description = "test description"
+        reminder.location = ""
+        assertThat(saveReminderViewModel.validateEnteredData(reminder),`is`(false))     // location is empty
+
+        reminder.location = "test location"
+        assertThat(saveReminderViewModel.validateEnteredData(reminder),`is`(true))      // no empty fields
+    }
+
     @Test
-    fun saveReminder_Valid() = runTest {
-        makeReminderValid()
-        val validReminder = saveReminderViewModel.saveReminder{
-            it.description = "description"
-            it.latitude = 1.0
-            it.longitude= 1.0
-            it.location = "location"
-            it.title = "title"
-
-        }
-
-        // run all pending coroutines
-        runCurrent()
-
-        assertThat(dataSource.getReminder(validReminder.id), `is`(instanceOf(Result.Success::class.java)))
-        // assert that navigates back to the previous fragment
-        assertThat(saveReminderViewModel.navigationCommand.getOrAwaitValue(), equalTo(NavigationCommand.Back))
+    fun testShowLoading(){
+        mainCoroutineRule.pauseDispatcher()
+        saveReminderViewModel.saveReminder(testReminder)
+        assertThat(saveReminderViewModel.showLoading.value, `is`(true))
+        mainCoroutineRule.resumeDispatcher()
+        assertThat(saveReminderViewModel.showLoading.value, `is`(false))
     }
 
-    // testing validation by passing null title and null location
-    // we expect showing snackBar to indicate to err_enter_title, and validate return false
-    @Test
-    fun shouldReturnError() {
-        makeReminderInvalid()
-        saveReminderViewModel.validateEnteredData()
 
-        assertThat(saveReminderViewModel.showSnackBarInt.getOrAwaitValue(), equalTo(R.string.err_enter_title))
-    }
 
 }

@@ -9,20 +9,15 @@
     android:padding="@dimen/no_padding"
     >
 
-    <Button
-        android:id="@+id/button"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/continue_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/colorAccent"
-        android:padding="@dimen/no_padding"
-        android:layout_margin="@dimen/no_margin"
-        android:text="@string/login"
-        android:textColor="@color/white"
+        android:text="login"
+        android:textAllCaps="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent" />
-
     <TextView
         android:id="@+id/welcome_text"
         android:layout_width="wrap_content"

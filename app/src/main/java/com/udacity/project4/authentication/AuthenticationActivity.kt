@@ -1,5 +1,6 @@
 package com.udacity.project4.authentication
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -20,78 +21,55 @@ import com.udacity.project4.locationreminders.RemindersActivity
  * signed in users to the RemindersActivity.
  */
 class AuthenticationActivity : AppCompatActivity() {
-    companion object{
-        const val TAG = "AuthenticationActivity"
-    }
-    private val viewModel by viewModels<LoginViewModel>()
-    val signInLauncher = registerForActivityResult(
-        FirebaseAuthUIActivityResultContract()
-    ) { res ->
-        this.onSignInResult(res)
-    }
+    private val viewModel: AuthenticationViewModel by viewModels()
 
-    private lateinit var  binding  : ActivityAuthenticationBinding
+    private val signInLauncher =
+        registerForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
+            onSignInResult(result)
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityAuthenticationBinding.inflate(layoutInflater)
-
+        val binding = ActivityAuthenticationBinding.inflate(layoutInflater)
         setContentView(binding.root)
-//         COMPLETED: Implement the create account and sign in using FirebaseUI, use sign in using email and sign in using Google
 
-        binding.button.setOnClickListener{
-            createSignInIntent()
-        }
-
-
-
-    }
-
-    override fun onStart() {
-        super.onStart()
-    }
-
-    private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
-        val response = result.idpResponse
-        if (result.resultCode == RESULT_OK) {
-            // Successfully signed in
-            // val user = FirebaseAuth.getInstance().currentUser
-            //          COMPLETED : If the user was authenticated, send him to RemindersActivity
-            Log.i(TAG, "Successfully signed in user ${FirebaseAuth.getInstance().currentUser?.displayName}!")
-            val intent = Intent(this, RemindersActivity::class.java)
-            startActivity(intent)
-
-        } else {
-            // Sign in failed. If response is null the user canceled the
-            // sign-in flow using the back button. Otherwise check
-            // response.getError().getErrorCode() and handle the error.
-            // ...
-            Log.i(TAG, "Sign in unsuccessful ${response?.error?.message}")
-            Snackbar.make(
-                binding.root, getString(R.string.login_unsuccessful_msg),
-                Snackbar.LENGTH_LONG
-            ).show()
+        viewModel.authStateLive.observe(this) {
+            if (it != null)
+                when (it) {
+                    is AuthState.Authenticated -> {
+                        startActivity(Intent(this, RemindersActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        })
+                        finish()
+                    }
+                    AuthState.UnAuthenticated -> {
+                        launchAuthenticationFlow()
+                    }
+                }
         }
     }
 
-    private fun createSignInIntent() {
-        val providers = arrayListOf(
-            AuthUI.IdpConfig.EmailBuilder().build(),
-            AuthUI.IdpConfig.GoogleBuilder().build())
+    private fun launchAuthenticationFlow() {
+        signInLauncher.launch(
+            AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setAvailableProviders(
+                    listOf(
+                        AuthUI.IdpConfig.GoogleBuilder().build(),
+                        AuthUI.IdpConfig.EmailBuilder().build()
+                    )
+                )
+                .setTheme(R.style.AppTheme)
+                .setIsSmartLockEnabled(false, true)
+                .build()
+        )
+    }
 
-        //  COMPLETED: a bonus is to customize the sign in flow to look nice using :
-        // https://github.com/firebase/FirebaseUI-Android/blob/master/auth/README.md#custom-layout
-        val customlayout = AuthMethodPickerLayout.Builder(R.layout.authentication_picker_layout)
-            .setGoogleButtonId(R.id.google_login_btn)
-            .setEmailButtonId(R.id.mail_login_btn)
-            .build()
+    private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult?) {
+        Log.d(TAG, "sign in success: ${result?.resultCode == Activity.RESULT_OK}")
+    }
 
-        val signInIntent = AuthUI.getInstance()
-            .createSignInIntentBuilder()
-            .setAvailableProviders(providers)
-            .setAuthMethodPickerLayout(customlayout)
-            .build()
-
-        signInLauncher.launch(signInIntent)
-
+    companion object {
+        private const val TAG = "AuthenticationActivity"
     }
 }

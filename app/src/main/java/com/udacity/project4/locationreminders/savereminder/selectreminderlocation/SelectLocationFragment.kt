@@ -5,6 +5,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Geocoder
 import android.os.Bundle
 import android.os.Looper
@@ -22,10 +23,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PointOfInterest
+import com.google.android.gms.maps.model.*
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
@@ -36,11 +34,16 @@ import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import java.util.*
 import java.util.concurrent.TimeUnit
+import com.udacity.project4.Constants
+
 
 
 class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
     private val TAG = "SelectLocationFragment"
     private var permissionDenied = false
+
+    private var activeMark: Marker? = null
+    private var activeCircle: Circle? = null
 
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by sharedViewModel()
@@ -323,7 +326,17 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
     private fun stopLocationUpdates() {
         fusedLocationProviderClient.removeLocationUpdates(locationCallback)
     }
-
+    private fun drawRadiusAroundTheMark(googleMap: GoogleMap) {
+        activeMark?.let {
+            activeCircle?.remove()
+            activeCircle = googleMap.addCircle(
+                CircleOptions()
+                    .center(it.position)
+                    .radius(Constants.REMINDER_LOCATION_CIRCLE_RADIUS.toDouble())
+                    .strokeColor(Color.MAGENTA)
+            )
+        }
+    }
     private fun setMapStyle(map: GoogleMap) {
         try {
             // Customize the styling of the base map using a JSON object defined
@@ -372,6 +385,7 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
                     .title(getString(R.string.dropped_pin))
                     .snippet(snippet)
             )
+            drawRadiusAroundTheMark(map)
             binding.saveLocation.isEnabled = true
         }
     }
@@ -387,6 +401,7 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
                     .title(it.name)
                     .snippet(it.name)
             )?.showInfoWindow()
+            drawRadiusAroundTheMark(map)
 
             binding.saveLocation.isEnabled = true
         }

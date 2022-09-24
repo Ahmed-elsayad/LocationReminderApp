@@ -3,23 +3,29 @@ package com.udacity.project4.authentication
 import androidx.lifecycle.LiveData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
-class FirebaseUserLiveData : LiveData<FirebaseUser?>() {
-    private val firebaseAuth = FirebaseAuth.getInstance()
+sealed class AuthState {
+    object UnAuthenticated : AuthState()
+    data class Authenticated(val firebaseUser: FirebaseUser) : AuthState()
+}
+
+class AuthStateLiveData : LiveData<AuthState?>() {
+
+    private val auth = Firebase.auth
 
     private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-        // Use the FirebaseAuth instance instantiated at the beginning of the class to get an entry
-        // point into the Firebase Authentication SDK the app is using.
-        // With an instance of the FirebaseAuth class, you can now query for the current user.
-        value = firebaseAuth.currentUser
+        value = firebaseAuth.currentUser?.let { AuthState.Authenticated(it) } ?: AuthState.UnAuthenticated
     }
 
     override fun onActive() {
-        firebaseAuth.addAuthStateListener(authStateListener)
+        super.onActive()
+        auth.addAuthStateListener(authStateListener)
     }
 
     override fun onInactive() {
-        firebaseAuth.removeAuthStateListener(authStateListener)
+        super.onInactive()
+        auth.removeAuthStateListener(authStateListener)
     }
-
 }
